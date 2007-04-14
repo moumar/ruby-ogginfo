@@ -1,4 +1,4 @@
-# $Id: ogginfo.rb 26 2004-06-21 12:05:17Z moumar $
+# $Id: ogginfo.rb 31 2007-04-14 12:40:40Z moumar $
 # = Description
 #
 # ruby-ogginfo gives you access to low level information on ogg files
@@ -19,6 +19,11 @@
 #
 # = Changelog
 #
+# [0.2 11/07/2005]
+# 
+# * tag["key"] is accessible with tag.key
+#
+#
 # [0.1 20/06/2004]
 # 
 # * first public version
@@ -33,6 +38,19 @@
 
 require "iconv"
 
+class Hash 
+   ### lets you specify hash["key"] as hash.key
+   ### this came from CodingInRuby on RubyGarden
+   ### http://www.rubygarden.org/ruby?CodingInRuby 
+   def method_missing(meth,*args) 
+     if /=$/=~(meth=meth.id2name) then
+       self[meth[0...-1]] = (args.length<2 ? args[0] : args)
+     else
+       self[meth]
+     end
+   end
+end
+					    
 # Raised on any kind of error related to ruby-ogginfo
 class OggInfoError < StandardError ; end
 
@@ -51,16 +69,14 @@ class OggInfo
   attr_reader :channels, :samplerate, :bitrate, :tag, :length
 
   def initialize(filename, charset = "iso-8859-1")
-    begin
-      @file = File.new(filename, "rb")
-      find_page()
-      extract_infos()
-      find_page()
-      extract_tag(charset)
-      extract_end()
-    ensure
-      close
-    end
+    @file = File.new(filename, "rb")
+    find_page()
+    extract_infos()
+    find_page()
+    extract_tag(charset)
+    @saved_tag = @tag.dup
+    extract_end()
+    @average_bitrate = @file.stat.size.to_f*8/@length
   end
 
   # "block version" of ::new()
@@ -80,7 +96,16 @@ class OggInfo
   end
 
   def close
-      @file.close if @file and not @file.closed?
+    @file.close if @file and not @file.closed?
+    if @tag != @saved_tag
+      cmd = %w{vorbiscomment -w} 
+
+      @tag.each do |k,v|
+        cmd.concat(["-t", k.upcase+"="+v])
+      end
+      cmd << @file.path
+      system(*cmd)
+    end
   end
 
   def hastag?
@@ -88,7 +113,7 @@ class OggInfo
   end
   
   def to_s
-    "channels #{@channels} samplerate #{@samplerate} bitrate #{@bitrate} length #{@length}"
+    "channels #{@channels} samplerate #{@samplerate} bitrate #{@bitrate} average bitrate #{@average_bitrate} length #{@length} "
   end
 
 private
