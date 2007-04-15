@@ -1,4 +1,4 @@
-# $Id: ogginfo.rb 31 2007-04-14 12:40:40Z moumar $
+# $Id: ogginfo.rb 32 2007-04-15 17:35:01Z moumar $
 # = Description
 #
 # ruby-ogginfo gives you access to low level information on ogg files
