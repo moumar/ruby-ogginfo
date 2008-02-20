@@ -1,37 +1,4 @@
-# $Id: ogginfo.rb 32 2007-04-15 17:35:01Z moumar $
-# = Description
-#
-# ruby-ogginfo gives you access to low level information on ogg files
-# (bitrate, length, samplerate, encoder, etc... ), as well as tag.
-# It is written in pure ruby.
-#
-#
-# = Download
-#
-#
-# http://rubyforge.org/projects/ruby-ogginfo/
-#
-#
-# = Generate documentation
-# 
-# rdoc --template=kilmer ogginfo.rb
-#
-#
-# = Changelog
-#
-# [0.2 11/07/2005]
-# 
-# * tag["key"] is accessible with tag.key
-#
-#
-# [0.1 20/06/2004]
-# 
-# * first public version
-#
-#
-# License:: Ruby
-# Author:: Guillaume Pierronnet (mailto:moumar_AT__rubyforge_DOT_org)
-# Website:: http://ruby-ogginfo.rubyforge.org/
+# $Id: ogginfo.rb 34 2008-02-20 22:50:35Z moumar $
 #
 # see http://www.xiph.org/ogg/vorbis/docs.html for documentation on vorbis format
 # http://www.xiph.org/ogg/vorbis/doc/v-comment.html
@@ -55,6 +22,7 @@ end
 class OggInfoError < StandardError ; end
 
 class OggInfo
+  VERSION = "0.2"
 =begin
   FIELDS_MAPPING = {
     "title" => "songname",

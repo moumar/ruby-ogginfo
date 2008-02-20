@@ -1,0 +1,7 @@
+=== 0.2 / 2005-07-11
+
+* tag["key"] is accessible with tag.key
+
+=== 0.1 / 2004-06-20
+
+* first public version
