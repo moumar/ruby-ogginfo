@@ -1,4 +1,4 @@
-# $Id: ogginfo.rb 34 2008-02-20 22:50:35Z moumar $
+# $Id: ogginfo.rb 35 2008-02-24 12:34:00Z moumar $
 #
 # see http://www.xiph.org/ogg/vorbis/docs.html for documentation on vorbis format
 # http://www.xiph.org/ogg/vorbis/doc/v-comment.html
@@ -126,14 +126,16 @@ private
     size = @file.read(4).unpack("V")[0]
     @file.seek(size, IO::SEEK_CUR)
     tag_size = @file.read(4).unpack("V")[0]
-    ic = Iconv.new(charset, "utf8")
+
+    if charset !~ /^utf-?8$/i
+      ic = Iconv.new(charset, "utf8")
+    end
+
     tag_size.times do |i|
       size = @file.read(4).unpack("V")[0]
-      com = @file.read(size)
-      begin
-        comment = ic.iconv( com )
-      rescue Iconv::IllegalSequence, Iconv::InvalidCharacter
-        comment = com
+      comment = @file.read(size)
+      if ic
+        comment = ic.iconv( com ) rescue comment
       end
       key, val = comment.split(/=/)
       @tag[key.downcase] = val
