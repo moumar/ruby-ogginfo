@@ -1,3 +1,8 @@
+=== 0.3 / 2008-03-15
+
+* write support through "vorbiscomment" binary
+* correct encoding handling
+
 === 0.2 / 2005-07-11
 
 * tag["key"] is accessible with tag.key

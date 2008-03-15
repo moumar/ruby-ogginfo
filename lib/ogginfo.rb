@@ -1,4 +1,4 @@
-# $Id: ogginfo.rb 35 2008-02-24 12:34:00Z moumar $
+# $Id: ogginfo.rb 36 2008-03-15 01:01:51Z moumar $
 #
 # see http://www.xiph.org/ogg/vorbis/docs.html for documentation on vorbis format
 # http://www.xiph.org/ogg/vorbis/doc/v-comment.html
@@ -22,34 +22,28 @@ end
 class OggInfoError < StandardError ; end
 
 class OggInfo
-  VERSION = "0.2"
-=begin
-  FIELDS_MAPPING = {
-    "title" => "songname",
-    "artist" => "artist",
-    "album" => "album",
-    "date" => "year",
-    "description" => "comment",
-    "tracknumber" => "tracknum",
-    "genre" => "genre"
-  }
-=end
-  attr_reader :channels, :samplerate, :bitrate, :tag, :length
+  VERSION = "0.3"
+  attr_reader :channels, :samplerate, :bitrate, :nominal_bitrate, :tag, :length
 
+  # create new instance of OggInfo, with +charset+ as string.
   def initialize(filename, charset = "iso-8859-1")
     @file = File.new(filename, "rb")
-    find_page()
-    extract_infos()
-    find_page()
+    if charset !~ /^utf-?8$/i
+      @ic = Iconv.new(charset, "utf8")
+    end
+
+    find_next_page
+    extract_infos
+    find_next_page
     extract_tag(charset)
     @saved_tag = @tag.dup
-    extract_end()
-    @average_bitrate = @file.stat.size.to_f*8/@length
+    extract_end
+    @bitrate = @file.stat.size.to_f*8/@length
   end
 
   # "block version" of ::new()
-  def self.open(filename)
-    m = self.new(filename)
+  def self.open(*args)
+    m = self.new(*args)
     ret = nil
     if block_given?
       begin
@@ -64,6 +58,7 @@ class OggInfo
   end
 
   def close
+    @ic.close
     @file.close if @file and not @file.closed?
     if @tag != @saved_tag
       cmd = %w{vorbiscomment -w} 
@@ -77,15 +72,15 @@ class OggInfo
   end
 
   def hastag?
-    not @tag.empty?
+    !@tag.empty?
   end
   
   def to_s
-    "channels #{@channels} samplerate #{@samplerate} bitrate #{@bitrate} average bitrate #{@average_bitrate} length #{@length} "
+    "channels #{@channels} samplerate #{@samplerate} bitrate #{@nominal_bitrate} bitrate #{@bitrate} length #{@length} #{@tag.inspect}"
   end
 
 private
-  def find_page
+  def find_next_page
     header = 'OggS' # 0xf4 . 0x67 . 0x 67 . 0x53
     bytes = @file.read(4)
     bytes_read = 4
@@ -101,21 +96,15 @@ private
   end
 
   def extract_infos
-#    @bitrate = {}
     @file.seek(35, IO::SEEK_CUR) # seek after "vorbis"
-#    @channels, @samplerate, @bitrate["upper"], @bitrate["nominal"], @bitrate["lower"] = 
-    @channels, @samplerate, up_br, br, down_br = 
-      @file.read(17).unpack("CV4")
-    @bitrate = 
-      if br == 0
-        if up == 2**32 - 1 or down == 2**32 - 1 
-	  0
-	else
-	  (up_br + down_br)/2
-	end
-      else 
-        br
+    @channels, @samplerate, up_br, @nominal_bitrate, down_br = @file.read(17).unpack("CV4")
+    if @nominal_bitrate == 0
+      if up == 2**32 - 1 or down == 2**32 - 1 
+	@nominal_bitrate = 0
+      else
+	@nominal_bitrate = (up_br + down_br)/2
       end
+    end
   end
 
   def extract_tag(charset)
@@ -127,47 +116,25 @@ private
     @file.seek(size, IO::SEEK_CUR)
     tag_size = @file.read(4).unpack("V")[0]
 
-    if charset !~ /^utf-?8$/i
-      ic = Iconv.new(charset, "utf8")
-    end
-
     tag_size.times do |i|
       size = @file.read(4).unpack("V")[0]
       comment = @file.read(size)
-      if ic
-        comment = ic.iconv( com ) rescue comment
+      if @ic
+        comment = @ic.iconv( com ) rescue comment
       end
       key, val = comment.split(/=/)
       @tag[key.downcase] = val
     end
-    ic.close
   end
 
   def extract_end
     begin #Errno::EINVAL
       @file.seek(-5000, IO::SEEK_END) #FIXME size of seeking
-      find_page
+      find_next_page
       pos = @file.read(6).unpack("x2 V")[0] #FIXME pos is int64
       @length = pos.to_f / @samplerate
     rescue Errno::EINVAL
       @length = 0
     end
-  end
-end
-
-if $0 == __FILE__
-  while filename = ARGV.shift
-    puts "Getting info from #{filename}"
-    begin
-      ogg = OggInfo.new(filename)
-    rescue OggInfoError
-     puts "error: doesn't appear to be an ogg file"
-    else
-      puts ogg
-      ogg.tag.each { |key, value|
-        puts "#{key} => #{value}"
-      }
-    end
-    puts
   end
 end

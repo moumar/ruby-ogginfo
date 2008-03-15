@@ -1,4 +1,4 @@
-= Ruby-ogginfo_
+= ruby-ogginfo
 
 http://ruby-ogginfo.rubyforge.org/
 
@@ -8,16 +8,27 @@ ruby-ogginfo gives you access to low level information on ogg files
 (bitrate, length, samplerate, encoder, etc... ), as well as tag.
 It is written in pure ruby.
 
+== FEATURES/PROBLEMS
+
+* writing tags is not pure ruby yet, need to have "vorbiscomment"
+  command
+
 == SYNOPSIS:
 
 require "ogginfo"
-ogg = OggInfo.new("toto.ogg")
-puts ogg.bitrate
-puts ogg.artist
+OggInfo.open("toto.ogg") do |ogg|
+  puts ogg.bitrate
+  puts ogg.artist
+  puts ogg
+end
 
 == INSTALL:
 
 sudo gem install ruby-ogginfo
+
+== TODO:
+
+* test suite!!
 
 == LICENSE:
 

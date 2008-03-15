@@ -3,4 +3,4 @@ Manifest.txt
 README.txt
 Rakefile
 lib/ogginfo.rb
-test/test.rb
+test/test_ruby-ogginfo.rb
