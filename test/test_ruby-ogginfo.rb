@@ -142,6 +142,17 @@ class OggInfoTest < Test::Unit::TestCase
     end
   end
 
+  def test_charset
+    generate_ogg
+    OggInfo.open("test.ogg", "utf-8") do |ogg|
+      ogg.tag["title"] = "hello\303\251"
+    end
+
+    OggInfo.open("test.ogg", "iso-8859-1") do |ogg|
+      assert_equal "hello\xe9", ogg.tag["title"] 
+    end
+  end
+
   def generate_ogg
     unless test(?f, "test.ogg")
       system("dd if=/dev/urandom bs=1024 count=3000 | oggenc -q0 --raw -o test.ogg -") or

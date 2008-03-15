@@ -1,4 +1,4 @@
-# $Id: ogginfo.rb 37 2008-03-15 01:08:44Z moumar $
+# $Id: ogginfo.rb 39 2008-03-15 17:21:31Z moumar $
 #
 # see http://www.xiph.org/ogg/vorbis/docs.html for documentation on vorbis format
 # http://www.xiph.org/ogg/vorbis/doc/v-comment.html
@@ -22,7 +22,7 @@ end
 class OggInfoError < StandardError ; end
 
 class OggInfo
-  VERSION = "0.3"
+  VERSION = "0.3.1"
   attr_reader :channels, :samplerate, :bitrate, :nominal_bitrate, :length
   
   # +tag+ is a hash containing the vorbis tag like "Artist", "Title", and the like
@@ -30,18 +30,19 @@ class OggInfo
 
   # create new instance of OggInfo, using +charset+ to convert tags to
   def initialize(filename, charset = "iso-8859-1")
-    @file = File.new(filename, "rb")
-    if charset !~ /^utf-?8$/i
-      @ic = Iconv.new(charset, "utf8")
-    end
+    @filename = filename
+    @charset = charset
+    @file = File.new(@filename, "rb")
 
     find_next_page
     extract_infos
     find_next_page
-    extract_tag(charset)
+    extract_tag
+    convert_tag_charset("utf-8", @charset)
     @saved_tag = @tag.dup
     extract_end
     @bitrate = @file.stat.size.to_f*8/@length
+    @file.close
   end
 
   # "block version" of ::new()
@@ -62,15 +63,14 @@ class OggInfo
 
   # write any tags to file
   def close
-    @ic.close
-    @file.close if @file and not @file.closed?
     if @tag != @saved_tag
       cmd = %w{vorbiscomment -w} 
+      convert_tag_charset(@charset, "utf-8")
 
       @tag.each do |k,v|
         cmd.concat(["-t", k.upcase+"="+v])
       end
-      cmd << @file.path
+      cmd << @filename
       system(*cmd)
     end
   end
@@ -112,7 +112,7 @@ private
     end
   end
 
-  def extract_tag(charset)
+  def extract_tag
     @tag = {}
     @file.seek(22, IO::SEEK_CUR)
     segs = @file.read(1).unpack("C")[0]
@@ -124,9 +124,6 @@ private
     tag_size.times do |i|
       size = @file.read(4).unpack("V")[0]
       comment = @file.read(size)
-      if @ic
-        comment = @ic.iconv( com ) rescue comment
-      end
       key, val = comment.split(/=/)
       @tag[key.downcase] = val
     end
@@ -140,6 +137,14 @@ private
       @length = pos.to_f / @samplerate
     rescue Errno::EINVAL
       @length = 0
+    end
+  end
+
+  def convert_tag_charset(from_charset, to_charset)
+    Iconv.open(to_charset, from_charset) do |ic|
+      @tag.each do |k, v|
+        @tag[k] = ic.iconv(v)
+      end
     end
   end
 end
