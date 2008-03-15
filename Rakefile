@@ -12,6 +12,7 @@ Hoe.new('ruby-ogginfo', OggInfo::VERSION) do |p|
   p.description = p.paragraphs_of('README.txt', 3).first
   p.url = p.paragraphs_of('README.txt', 1).first
   p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
+  p.remote_rdoc_dir = ''
 end
 
 # vim: syntax=Ruby

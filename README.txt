@@ -15,12 +15,12 @@ It is written in pure ruby.
 
 == SYNOPSIS:
 
-require "ogginfo"
-OggInfo.open("toto.ogg") do |ogg|
-  puts ogg.bitrate
-  puts ogg.artist
-  puts ogg
-end
+  require "ogginfo"
+  OggInfo.open("toto.ogg") do |ogg|
+    puts ogg.bitrate
+    puts ogg.artist
+    puts ogg
+  end
 
 == INSTALL:
 
@@ -28,7 +28,7 @@ sudo gem install ruby-ogginfo
 
 == TODO:
 
-* test suite!!
+* writing tags in pure-ruby
 
 == LICENSE:
 

@@ -1,4 +1,4 @@
-# $Id: ogginfo.rb 36 2008-03-15 01:01:51Z moumar $
+# $Id: ogginfo.rb 37 2008-03-15 01:08:44Z moumar $
 #
 # see http://www.xiph.org/ogg/vorbis/docs.html for documentation on vorbis format
 # http://www.xiph.org/ogg/vorbis/doc/v-comment.html
@@ -23,9 +23,12 @@ class OggInfoError < StandardError ; end
 
 class OggInfo
   VERSION = "0.3"
-  attr_reader :channels, :samplerate, :bitrate, :nominal_bitrate, :tag, :length
+  attr_reader :channels, :samplerate, :bitrate, :nominal_bitrate, :length
+  
+  # +tag+ is a hash containing the vorbis tag like "Artist", "Title", and the like
+  attr_reader :tag
 
-  # create new instance of OggInfo, with +charset+ as string.
+  # create new instance of OggInfo, using +charset+ to convert tags to
   def initialize(filename, charset = "iso-8859-1")
     @file = File.new(filename, "rb")
     if charset !~ /^utf-?8$/i
@@ -57,6 +60,7 @@ class OggInfo
     ret
   end
 
+  # write any tags to file
   def close
     @ic.close
     @file.close if @file and not @file.closed?
@@ -71,6 +75,7 @@ class OggInfo
     end
   end
 
+  # check the presence of a tag
   def hastag?
     !@tag.empty?
   end
