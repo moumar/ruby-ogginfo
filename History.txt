@@ -1,3 +1,8 @@
+=== 0.3.2 / 2009-06-22
+
+* added setup.rb for tarball distribution
+* added license on top of lib/ogginfo.rb
+
 === 0.3.1 / 2008-03-16
 
 * bug fixed #18852 "OggInfo#close(): close @ic only if not nil"

@@ -2,6 +2,8 @@
 #
 # see http://www.xiph.org/ogg/vorbis/docs.html for documentation on vorbis format
 # http://www.xiph.org/ogg/vorbis/doc/v-comment.html
+# 
+# License: ruby
 
 require "iconv"
 
@@ -22,7 +24,7 @@ end
 class OggInfoError < StandardError ; end
 
 class OggInfo
-  VERSION = "0.3.1"
+  VERSION = "0.3.2"
   attr_reader :channels, :samplerate, :bitrate, :nominal_bitrate, :length
   
   # +tag+ is a hash containing the vorbis tag like "Artist", "Title", and the like
