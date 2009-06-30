@@ -2,5 +2,6 @@ History.txt
 Manifest.txt
 README.txt
 Rakefile
+setup.rb
 lib/ogginfo.rb
 test/test_ruby-ogginfo.rb
