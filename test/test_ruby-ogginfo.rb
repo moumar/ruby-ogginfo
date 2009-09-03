@@ -117,7 +117,7 @@ class OggInfoTest < Test::Unit::TestCase
       assert_equal 64000, ogg.nominal_bitrate
       assert_equal 2, ogg.channels
       assert_equal 44100, ogg.samplerate
-      assert_equal 0, ogg.length
+      assert_in_delta(0.5, ogg.length, 1)
       #average_bitrate
     end
   end
