@@ -126,7 +126,7 @@ private
     tag_size.times do |i|
       size = @file.read(4).unpack("V")[0]
       comment = @file.read(size)
-      key, val = comment.split(/=/)
+      key, val = comment.split(/=/, 2)
       @tag[key.downcase] = val
     end
   end
