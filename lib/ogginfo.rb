@@ -97,7 +97,7 @@ class OggInfo
   attr_reader :tag
 
   # create new instance of OggInfo, using +charset+ to convert tags to
-  def initialize(filename, charset = "iso-8859-1")
+  def initialize(filename, charset = "utf-8")
     @filename = filename
     @charset = charset
     @file = File.new(@filename, "rb")
@@ -240,6 +240,7 @@ private
   end
 
   def convert_tag_charset(from_charset, to_charset)
+    return if from_charset == to_charset
     Iconv.open(to_charset, from_charset) do |ic|
       @tag.each do |k, v|
         @tag[k] = ic.iconv(v)
