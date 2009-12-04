@@ -151,6 +151,7 @@ class OggInfo
     "channels #{@channels} samplerate #{@samplerate} bitrate #{@nominal_bitrate} bitrate #{@bitrate} length #{@length} #{@tag.inspect}"
   end
 
+  # read an ogg frame from the +file+
   def self.read_frame(file)
     frame = {}
 
@@ -180,21 +181,22 @@ class OggInfo
     frame
   end
 
-  def checksum(frame)
-    original_pos = @file.pos
-    @file.seek(frame[:file_position])
-    data = @file.read(frame[:size])
+  # compute the checksum of a given +frame+ from a given +file+, you can compare it with frame[:checksum].
+  def self.checksum(file, frame)
+    original_pos = file.pos
+    file.seek(frame[:file_position])
+    data = file.read(frame[:size])
     data[22] = data[23] = data[24] = data[25] = 0
 
     crc = 0
     data.each_byte do |byte|
-      crc = (crc << 8)^CHECKSUM_TABLE[((crc >> 24)&0xff) ^ byte] #og->header[i]];
+      crc = (crc << 8)^CHECKSUM_TABLE[((crc >> 24)&0xff) ^ byte]
       crc = crc & 0xffffffff
     end
 
     # "reverse" it
     crc = [crc].pack("V").unpack("N").first
-    @file.seek(original_pos)
+    file.seek(original_pos)
     crc
   end
 
