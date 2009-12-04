@@ -1,3 +1,9 @@
+=== 0.4 / 2009-12-04
+
+* new ogg frame reading implementation 
+* better tag reading (thanks to Sven) 
+* now assume utf-8 by default to decode tags
+
 === 0.3.2 / 2009-06-22
 
 * added setup.rb for tarball distribution
