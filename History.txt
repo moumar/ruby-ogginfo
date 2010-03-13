@@ -1,3 +1,7 @@
+=== 0.4.2 / 2010-03-13
+
+* bugfix on frame parsing
+
 === 0.4.1 / 2010-03-13
 
 * bugfix on file parsing
