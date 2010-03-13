@@ -173,9 +173,13 @@ class OggInfo
       raise(OggInfoError, "bad magic number '#{capture_pattern}'")
     end
 
-    segment_sizes = file.read(frame[:page_segments]).unpack("C*")
+    
+    frame[:body_size] = 0
+    if d = file.read(frame[:page_segments])
+      segment_sizes = d.unpack("C*")
+      frame[:body_size] = segment_sizes.inject(0) { |sum, i| sum += i }
+    end
     frame[:header_size] = 27 + frame[:page_segments]
-    frame[:body_size] = segment_sizes.inject(0) { |sum, i| sum += i }
     frame[:size] = frame[:header_size] + frame[:body_size]
     file.seek(frame[:body_size], IO::SEEK_CUR)
     frame
