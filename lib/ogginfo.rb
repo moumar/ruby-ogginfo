@@ -159,6 +159,7 @@ class OggInfo
 
     return nil if file.eof?
     chunk = file.read(27)
+    raise OggInfoError if file.eof?
 
     capture_pattern,
     frame[:version],
@@ -172,13 +173,9 @@ class OggInfo
     if capture_pattern != "OggS"
       raise(OggInfoError, "bad magic number '#{capture_pattern}'")
     end
-
     
-    frame[:body_size] = 0
-    if d = file.read(frame[:page_segments])
-      segment_sizes = d.unpack("C*")
-      frame[:body_size] = segment_sizes.inject(0) { |sum, i| sum += i }
-    end
+    segment_sizes = file.read(frame[:page_segments]).unpack("C*")
+    frame[:body_size] = segment_sizes.inject(0) { |sum, i| sum += i }
     frame[:header_size] = 27 + frame[:page_segments]
     frame[:size] = frame[:header_size] + frame[:body_size]
     file.seek(frame[:body_size], IO::SEEK_CUR)
