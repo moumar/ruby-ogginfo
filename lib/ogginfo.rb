@@ -103,7 +103,7 @@ class OggInfo
     @file = File.new(@filename, "rb")
 
     frames = (1..2).collect { |i| OggInfo.read_frame(@file) }
-    extract_vorbis_infos(frames[0])
+    extract_bitstream_infos(frames[0])
     extract_tag(frames[1])
     convert_tag_charset("utf-8", @charset)
     @original_tag = @tag.dup
@@ -130,7 +130,7 @@ class OggInfo
 
   # commits any tags to file
   def close
-    if @tag != @original_tag
+    if @bitstream_format == "vorbis" && @tag != @original_tag
       cmd = %w{vorbiscomment -w} 
       convert_tag_charset(@charset, "utf-8")
 
@@ -202,20 +202,45 @@ class OggInfo
   end
 
 private
+  def extract_bitstream_infos(frame)
+     @file.seek(frame[:file_position] + frame[:header_size] + 1)
+     @bitstream_format = @file.read(6).rstrip()
+     case @bitstream_format
+	when "vorbis" : extract_vorbis_infos(frame)
+        when "peex"  :
+             #Speex does not align itself to a 4 byte boundary.
+             @bitstream_format="Speex" 
+             extract_speex_infos(frame)
+        else raise(OggInfoError,"Unknown bitstream format #{@bitstream_format}") 
+     end
+  end
+
+  def extract_speex_infos(frame)
+    @file.seek(frame[:file_position] + frame[:header_size] ) 
+    speex_string,speex_version,speex_version_id,header_size,@samplerate,mode,mode_bitstream_version,
+         @channels,bitrate,framesize,vbr = @file.read(28+ 9 * 4).unpack("A8A20VVVVVVVVV")
+    #not sure how to make sense of the bitrate info,picard doesn't show it either...
+  end
+
   def extract_vorbis_infos(frame)
-    @file.seek(frame[:file_position] + frame[:header_size] + 1 ) # seek after "vorbis"
+    @file.seek(frame[:file_position] + frame[:header_size] + 1 ) 
+    
     vorbis_string, vorbis_version, @channels, @samplerate, upper_bitrate, @nominal_bitrate, lower_bitrate = @file.read(27).unpack("a6VCV4")
     if @nominal_bitrate == 0
       if upper_bitrate == 2**32 - 1 or lower_bitrate == 2**32 - 1 
 	@nominal_bitrate = 0
       else
 	@nominal_bitrate = (upper_bitrate + lower_bitrate)/2
-      end
+      end 
     end
   end
 
   def extract_tag(frame)
-    @file.seek(frame[:file_position] + frame[:header_size] + 1 + "vorbis".size)
+    @file.seek(frame[:file_position] + frame[:header_size] )
+    # GG: Vorbis includes a preamble "vorbis", which is not included in the comments,
+    # but is definitely in the /libvorbis/lib/info.c _vorbis_pack_comment reference implementation.
+    # Speex does not seem to include this preamble.
+    @file.read(7) if @bitstream_format=="vorbis"
     vendor_length = @file.read(4).unpack("V").first
     @vendor = @file.read(vendor_length)
 
