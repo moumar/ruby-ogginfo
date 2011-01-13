@@ -1,3 +1,7 @@
+=== 0.5 / 2011-01-13
+
+* speex support (thanks to Grant Gardner)
+
 === 0.4.2 / 2010-03-13
 
 * bugfix on frame parsing
