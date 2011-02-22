@@ -1,7 +1,13 @@
 History.txt
 Manifest.txt
-README.txt
+README.rdoc
 Rakefile
-setup.rb
+lib/ogg/codecs.rb
+lib/ogg/codecs/comments.rb
+lib/ogg/codecs/speex.rb
+lib/ogg/codecs/vorbis.rb
+lib/ogg/framing.rb
 lib/ogginfo.rb
+setup.rb
 test/test_ruby-ogginfo.rb
+test/test_ruby-spxinfo.rb

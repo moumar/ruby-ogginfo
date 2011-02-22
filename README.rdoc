@@ -1,7 +1,6 @@
 = ruby-ogginfo
 
-* http://ruby-ogginfo.rubyforge.org/
-* https://github.com/moumar/ruby-ogginfo
+http://ruby-ogginfo.rubyforge.org
 
 == DESCRIPTION:
 
