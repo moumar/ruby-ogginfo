@@ -3,7 +3,7 @@ require "codecs/vorbis"
 require "codecs/speex"
 
 module Ogg
-  CODECS = [Vorbis.new(),Speex.new()]
+  CODECS = [Vorbis.new, Speex.new]
   
   def self.detect_codec(input)
     if input.kind_of?(Page)
@@ -21,6 +21,4 @@ module Ogg
     
     return codec
   end
-  
-  
 end

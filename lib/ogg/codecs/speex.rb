@@ -1,4 +1,3 @@
-
 module Ogg
   class Speex
     include VorbisComments
@@ -13,9 +12,9 @@ module Ogg
       return info
     end
     
-    def replace_tags(reader,writer,new_tags,vendor)
+    def replace_tags(reader, writer, new_tags, vendor)
       tag_packet = reader.packets(1)
-      writer.write_packets(0,pack_comments(new_tags,vendor))
+      writer.write_packets(0, pack_comments(new_tags, vendor))
     end
     
     def extract_info(info_packet)
@@ -29,7 +28,7 @@ module Ogg
       channels,
       nominal_bitrate,
       framesize,
-      vbr =info_packet.unpack("A8A20VVVVVVVVV")
+      vbr = info_packet.unpack("A8A20VVVVVVVVV")
       #not sure how to make sense of the bitrate info,picard doesn't show it either...
       
       return { :channels => channels, :samplerate => samplerate, :nominal_bitrate => nominal_bitrate }
