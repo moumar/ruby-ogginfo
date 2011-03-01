@@ -58,6 +58,7 @@ EOF
 class SpxInfoTest < Test::Unit::TestCase
 
   TEMP_FILE = File.join(Dir.tmpdir, "test.spxinfo.spx")
+  GEN_FILE = File.join(Dir.tmpdir,"test.spxgen.spx")
 
   def setup
     valid_spx_file = VALID_SPX.unpack("m*").first
@@ -73,6 +74,7 @@ class SpxInfoTest < Test::Unit::TestCase
       assert_equal 1, spx.channels
       assert_equal 32000, spx.samplerate
       assert_in_delta(0.5, spx.length, 1)
+      assert_equal "cityrail",spx.tag["author"]
     end
   end
 
@@ -81,18 +83,34 @@ class SpxInfoTest < Test::Unit::TestCase
     OggInfo.open("test.spx") do |spx|
       assert_equal 2, spx.channels
       assert_equal 44100, spx.samplerate
+      assert_equal "spxinfotest", spx.tag.author
     end
   end
 
 
   def test_charset
     generate_spx
-    OggInfo.open("test.spx", "utf-8") do |spx|
-      assert_equal "spxinfotest", spx.tag["author"]
+    FileUtils.cp("test.spx",GEN_FILE)
+    OggInfo.open(GEN_FILE, "utf-8") do |spx|
+    	assert_equal "hello\303\251",spx.tag["test"] 
     end
 
-    OggInfo.open("test.spx", "iso-8859-1") do |spx|
+    OggInfo.open(GEN_FILE, "iso-8859-1") do |spx|
       assert_equal "hello\xe9", spx.tag["test"] 
+    end
+  end
+  
+  def test_tag_writing
+    generate_spx
+    FileUtils.cp("test.spx",GEN_FILE)
+    tag = {"title" => "mytitle", "test" => "myartist" }
+    OggInfo.open(GEN_FILE) do |spx|
+      spx.tag.clear
+      tag.each { |k,v| spx.tag[k] = v }
+    end
+
+    OggInfo.open(GEN_FILE) do |spx|
+      assert_equal tag, spx.tag
     end
   end
 
