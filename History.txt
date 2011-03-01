@@ -1,3 +1,7 @@
+=== 0.6 / 2011-03-01
+
+* pure ruby tag writing (thanks to Grant Gardner)
+
 === 0.5 / 2011-01-13
 
 * speex support (thanks to Grant Gardner)
