@@ -5,6 +5,7 @@ require 'hoe'
 
 Hoe.plugin :yard
 Hoe.plugin :git
+Hoe.plugin :rcov
 
 Hoe.spec('ruby-ogginfo') do 
   developer('Guillaume Pierronnet','moumar@rubyforge.org')
