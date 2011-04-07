@@ -135,7 +135,7 @@ class OggInfoTest < Test::Unit::TestCase
   end
 
   def test_big_tags
-    tag_test("title" => generate_random_string(60000), "artist" => generate_random_string(60000) )
+    tag_test("title" => generate_random_string(120_000), "artist" => generate_random_string(120_000) )
   end
   
 
@@ -219,5 +219,10 @@ class OggInfoTest < Test::Unit::TestCase
       assert_equal tag, ogg.tag
     end
     test_length
+    assert_nothing_raised do
+      Ogg::Reader.new(open(tf.path, "r")).each_pages(:checksum => true) do |page|
+        page
+      end
+    end
   end
 end
