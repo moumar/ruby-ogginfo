@@ -101,7 +101,7 @@ EOF
 
 class OggInfoTest < Test::Unit::TestCase
 
-  TEMP_FILE = File.join(Dir.tmpdir, "test_mp3info.ogg")
+  TEMP_FILE = File.join(Dir.tmpdir, "test_ogginfo.ogg")
 
   def setup
     valid_ogg_file = VALID_OGG.unpack("m*").first
@@ -123,40 +123,101 @@ class OggInfoTest < Test::Unit::TestCase
   end
 
   def test_length
-    generate_ogg
-    OggInfo.open("test.ogg") do |ogg|
-      assert_in_delta(17.0, ogg.length, 1)
-      assert_in_delta(67000.0, ogg.bitrate, 5000)
+    tf = generate_ogg
+    OggInfo.open(tf.path) do |ogg|
+      assert_in_delta(17.0, ogg.length, 1, "length has not been correctly guessed")
+      assert_in_delta(67000.0, ogg.bitrate, 2000, "bitrate has not been correctly guessed")
     end
   end
 
   def test_tag_writing
-    generate_ogg
-    tag = {"title" => "mytitle", "artist" => "myartist" }
-    OggInfo.open("test.ogg") do |ogg|
-      tag.each { |k,v| ogg.tag[k] = v }
-    end
-
-    OggInfo.open("test.ogg") do |ogg|
-      assert_equal tag, ogg.tag
-    end
+    tag_test("title" => generate_random_string, "artist" => generate_random_string )
   end
 
+  def test_big_tags
+    tag_test("title" => generate_random_string(60000), "artist" => generate_random_string(60000) )
+  end
+  
+
   def test_charset
-    generate_ogg
-    OggInfo.open("test.ogg", "utf-8") do |ogg|
+    tf = generate_ogg
+    OggInfo.open(tf.path, "utf-8") do |ogg|
       ogg.tag["title"] = "hello\303\251"
     end
 
-    OggInfo.open("test.ogg", "iso-8859-1") do |ogg|
+    OggInfo.open(tf.path, "iso-8859-1") do |ogg|
       assert_equal "hello\xe9", ogg.tag["title"] 
     end
   end
 
-  def generate_ogg
-    unless test(?f, "test.ogg")
-      system("dd if=/dev/urandom bs=1024 count=3000 | oggenc -q0 --raw -o test.ogg -") or
-        flunk("cannot generate \"test.ogg\", tests cannot be fully performed")
+  def test_should_not_fail_when_input_is_truncated
+    valid_ogg = generate_ogg
+    ogg_length = nil
+    OggInfo.open(valid_ogg.path) do |ogg|
+      ogg_length = ogg.length
     end
+
+    tf = generate_truncated_ogg
+    OggInfo.open(tf.path) do |truncated_ogg|
+      assert ogg_length != truncated_ogg.length
+    end
+
+    reader = Ogg::Reader.new(open(tf.path, "r"))
+    last_page = nil
+    reader.each_pages do |page|
+      last_page = page
+    end
+    assert_not_equal Ogg.compute_checksum(last_page.pack), last_page.checksum
+  end
+
+  def test_checksum
+    tf = generate_truncated_ogg
+    reader = Ogg::Reader.new(open(tf.path))
+    assert_raises(Ogg::StreamError) do
+      reader.each_pages(:checksum => true) do |page|
+        page
+      end
+    end
+  end
+
+  protected
+
+
+  def generate_ogg
+    generated_ogg_file_path = File.join(File.dirname(__FILE__), "test.ogg")
+    unless test(?f, generated_ogg_file_path)
+      system("dd if=/dev/urandom bs=1024 count=3000 | oggenc -q0 --raw -o #{generated_ogg_file_path} -") or
+        flunk("cannot generate \"#{generated_ogg_file_path}\", tests cannot be fully performed")
+    end
+    tf = Tempfile.new("ruby-ogginfo")
+    tf.close
+    FileUtils.cp(generated_ogg_file_path, tf.path)
+    tf
+  end
+
+  def generate_random_string(size = 256)
+    File.read("/dev/urandom", size)
+  end
+
+  def generate_truncated_ogg
+    valid_ogg = generate_ogg
+    tf = Tempfile.new("ruby-ogginfo")
+    data = File.read(valid_ogg.path, File.size(valid_ogg.path) - 10000)
+    tf.write(data)
+    tf.close
+    tf
+  end
+
+  def tag_test(tag) 
+    tf = generate_ogg
+
+    OggInfo.open(tf.path) do |ogg|
+      tag.each { |k,v| ogg.tag[k] = v }
+    end
+
+    OggInfo.open(tf.path) do |ogg|
+      assert_equal tag, ogg.tag
+    end
+    test_length
   end
 end

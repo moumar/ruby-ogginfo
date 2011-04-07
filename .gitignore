@@ -1,3 +1,4 @@
 *.ogg
 pkg/
 doc/
+coverage/

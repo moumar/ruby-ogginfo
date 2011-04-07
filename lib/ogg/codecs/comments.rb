@@ -1,5 +1,6 @@
-module Ogg
-  
+require "stringio"
+
+module Ogg::Codecs
   # See http://www.xiph.org/vorbis/doc/v-comment.html
   # Methods to pack/unpack vorbis comment packets
   # intended to be included into Codec classes
@@ -28,8 +29,8 @@ module Ogg
     end
     
     # Pack tag Hash and vendor string into an ogg packet.
-    def pack_comments(tag,vendor,preamble="")
-      packet_data = StringIO.new()
+    def pack_comments(tag, vendor, preamble="")
+      packet_data = ""
       packet_data << preamble
       
       packet_data << [ vendor.length ].pack("V")
@@ -43,8 +44,7 @@ module Ogg
       end
       
       packet_data << "\001"
-      result = packet_data.string
-      return result
+      packet_data
     end
   end
 end

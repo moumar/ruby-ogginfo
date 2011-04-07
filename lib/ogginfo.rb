@@ -3,11 +3,11 @@
 # http://www.xiph.org/vorbis/doc/framing.html
 # 
 # License: ruby
-$:.unshift File.expand_path(File.join(File.dirname(__FILE__)))
 
 require "iconv"
 require 'forwardable'
-require 'ogg/framing'
+require "tempfile"
+require File.join(File.dirname(__FILE__), 'ogg.rb')
 
 class Hash 
    ### lets you specify hash["key"] as hash.key
@@ -28,6 +28,7 @@ class OggInfoError < StandardError ; end
 class OggInfo
   VERSION = "0.6"
   extend Forwardable
+  include Ogg
   
   attr_reader :channels, :samplerate, :nominal_bitrate
   
@@ -43,7 +44,7 @@ class OggInfo
     filesize = File.size(@filename)
     File.open(@filename) do |file|
       begin
-     	info = Ogg.read_headers(file)
+     	info = read_headers(file)
         @samplerate = info[:samplerate]
         @nominal_bitrate = info[:nominal_bitrate]
         @channels = info[:channels]
@@ -66,7 +67,7 @@ class OggInfo
   def length
     unless @length
       File.open(@filename) do |file|
-       @length = Ogg.length(file,@samplerate)
+        @length = compute_length(file)
       end
     end
     return @length 
@@ -98,15 +99,17 @@ class OggInfo
   def close
     if tag != @original_tag
       convert_tag_charset(@charset, "utf-8")
-      tmpfile = @filename + ".vctemp"
-      #return unless File.writable?(tmpfile)
       
-      File.open(tmpfile,"w") do | output |
-        File.open(@filename) do | input |
-          Ogg.replace_tags(input, output, tag)
-      	end
+      tempfile = Tempfile.new("ruby-ogginfo")
+      begin
+        File.open(@filename, "rb") do | input |
+          replace_tags(input, tempfile, tag)
+        end
+        tempfile.close
+        FileUtils.cp(tempfile.path, @filename)
+      ensure
+        tempfile.close!
       end
-      FileUtils.move(tmpfile, @filename)
     end
   end
 
@@ -120,6 +123,55 @@ class OggInfo
   end
 
 private
+
+  def read_headers(input)
+    reader = Reader.new(input)
+    codec = Ogg.detect_codec(input)
+    codec.decode_headers(reader)
+  end
+  
+  # For both Vorbis and Speex, the granule_pos is the number of samples
+  # strictly this should be a codec function.
+  def compute_length(input)
+    reader = Reader.new(input)
+    last_page = nil
+    reader.each_pages({ :skip_body => true, :skip_checksum => true }) { |page| last_page = page }
+    return last_page.granule_pos.to_f / @samplerate
+  end
+  
+
+  # Pipe input to output transforming tags along the way
+  # input/output must be open streams reading for reading/writing  
+  def replace_tags(input, output, new_tags, vendor = "ruby-ogginfo")
+    # use the same serial number...
+    first_page = Page.read(input)
+    codec = Ogg.detect_codec(first_page)
+    bitstream_serial_no = first_page.bitstream_serial_no
+    reader = Reader.new(input)
+    writer = Writer.new(bitstream_serial_no, output)
+
+    # Write the first page as is (including presumably the b_o_s header)
+    writer.write_page(first_page)
+    
+    upcased_tags = new_tags.inject({}) do |memo, (k, v)| 
+      memo[k.upcase] = v
+      memo
+    end
+    # The codecs we know about put comments etc in following pages
+    # as suggested by the spec
+    written_pages_count = codec.replace_tags(reader, writer, upcased_tags, vendor)
+    if written_pages_count > 1
+      # Write the rest of the pages. We have to do page at a time
+      # because our tag replacement may have changed the number of
+      # pages and thus every subsequent page needs to have its
+      # sequence_no updated.
+      reader.each_pages(:skip_checksum => true) do |page|
+        writer.write_page(page)
+      end
+    else
+      FileUtils.copy_stream(reader.input, writer.output)
+    end
+  end
 
   def convert_tag_charset(from_charset, to_charset)
     return if from_charset == to_charset
