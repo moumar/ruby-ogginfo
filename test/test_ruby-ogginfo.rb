@@ -146,10 +146,14 @@ class OggInfoTest < Test::Unit::TestCase
     end
 
     OggInfo.open(tf.path, "iso-8859-1") do |ogg|
-      string = ''
-      string.force_encoding 'iso-8859-1'
-      [104, 101, 108, 108, 111, 233].each {|chr| string << chr}
-      assert_equal string, ogg.tag["title"] 
+      if RUBY_VERSION[0..2] == '1.8'
+        assert_equal "hello\xe9", ogg.tag["title"] 
+      else
+        string = ''
+        string.force_encoding 'iso-8859-1'
+        [104, 101, 108, 108, 111, 233].each {|chr| string << chr}
+        assert_equal string, ogg.tag["title"] 
+      end
     end
   end
 
