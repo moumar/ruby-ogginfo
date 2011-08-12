@@ -135,7 +135,7 @@ class OggInfoTest < Test::Unit::TestCase
   end
 
   def test_big_tags
-    tag_test("title" => generate_random_string(120_000), "artist" => generate_random_string(120_000) )
+    tag_test("title" => generate_random_string(60000), "artist" => generate_random_string(60000) )
   end
   
 
@@ -146,7 +146,14 @@ class OggInfoTest < Test::Unit::TestCase
     end
 
     OggInfo.open(tf.path, "iso-8859-1") do |ogg|
-      assert_equal "hello\xe9", ogg.tag["title"] 
+      if RUBY_VERSION[0..2] == '1.8'
+        assert_equal "hello\xe9", ogg.tag["title"] 
+      else
+        string = ''
+        string.force_encoding 'iso-8859-1'
+        [104, 101, 108, 108, 111, 233].each {|chr| string << chr}
+        assert_equal string, ogg.tag["title"] 
+      end
     end
   end
 
@@ -219,10 +226,5 @@ class OggInfoTest < Test::Unit::TestCase
       assert_equal tag, ogg.tag
     end
     test_length
-    assert_nothing_raised do
-      Ogg::Reader.new(open(tf.path, "r")).each_pages(:checksum => true) do |page|
-        page
-      end
-    end
   end
 end
