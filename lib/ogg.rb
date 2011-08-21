@@ -86,7 +86,7 @@ module Ogg
         input.rewind
       end
       
-      codecs = Ogg::Codecs.constants.map { |module_name| Ogg::Codecs.class_eval(module_name) }.select { |c| c.is_a?(Class) }
+      codecs = Ogg::Codecs.constants.map { |module_name| Ogg::Codecs.class_eval(module_name.to_s) }.select { |c| c.is_a?(Class) }
       codec = codecs.detect { |c| c.match?(first_page.segments.first) }
       unless codec
         raise(StreamError,"unknown codec")
