@@ -1,6 +1,6 @@
 History.txt
 Manifest.txt
-README.rdoc
+README.txt
 Rakefile
 lib/ogg/codecs/comments.rb
 lib/ogg/codecs/speex.rb

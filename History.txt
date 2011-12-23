@@ -1,3 +1,7 @@
+=== 0.6.6 / 2011-12-23
+
+* fixes for ruby 1.9 (thanks to gwolf)
+
 === 0.6.5 / 2011-04-07
 
 * internal reorganization, leading to more robust and faster library 
