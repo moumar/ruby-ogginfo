@@ -100,15 +100,15 @@ class OggInfo
     if tag != @original_tag
       convert_tag_charset(@charset, "utf-8")
       
-      tempfile = Tempfile.new("ruby-ogginfo")
+      tempfile = File.new("ruby-ogginfo", "wb")
       begin
         File.open(@filename, "rb") do | input |
           replace_tags(input, tempfile, tag)
         end
-        tempfile.close
-        FileUtils.cp(tempfile.path, @filename)
+        tempfile.flush
+        FileUtils.mv(tempfile.path, @filename)
       ensure
-        tempfile.close!
+        tempfile.close
       end
     end
   end

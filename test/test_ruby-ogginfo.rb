@@ -131,13 +131,14 @@ class OggInfoTest < Test::Unit::TestCase
   end
 
   def test_tag_writing
-    tag_test("title" => generate_random_string, "artist" => generate_random_string )
+    data = "a"*256
+    tag_test("tag_writing", "title" => data, "artist" => data )
   end
 
   def test_big_tags
-    tag_test("title" => generate_random_string(60000), "artist" => generate_random_string(60000) )
+    data = "a"*60000
+    tag_test("big_tags", "title" => data, "artist" => data )
   end
-  
 
   def test_charset
     tf = generate_ogg
@@ -189,7 +190,6 @@ class OggInfoTest < Test::Unit::TestCase
 
   protected
 
-
   def generate_ogg
     generated_ogg_file_path = File.join(File.dirname(__FILE__), "test.ogg")
     unless test(?f, generated_ogg_file_path)
@@ -202,10 +202,6 @@ class OggInfoTest < Test::Unit::TestCase
     tf
   end
 
-  def generate_random_string(size = 256)
-    File.read("/dev/urandom", size)
-  end
-
   def generate_truncated_ogg
     valid_ogg = generate_ogg
     tf = Tempfile.new("ruby-ogginfo")
@@ -215,7 +211,7 @@ class OggInfoTest < Test::Unit::TestCase
     tf
   end
 
-  def tag_test(tag) 
+  def tag_test(test_name, tag) 
     tf = generate_ogg
 
     OggInfo.open(tf.path) do |ogg|
@@ -225,6 +221,14 @@ class OggInfoTest < Test::Unit::TestCase
     OggInfo.open(tf.path) do |ogg|
       assert_equal tag, ogg.tag
     end
+    system("cp #{tf.path} /tmp/test_#{RUBY_VERSION}_#{test_name}.ogg")
     test_length
+    assert_nothing_raised do
+      io = open(tf.path)
+      reader = Ogg::Reader.new(io)
+      reader.each_pages do |page|
+        page
+      end
+    end
   end
 end
