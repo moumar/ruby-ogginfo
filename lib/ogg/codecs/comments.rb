@@ -20,6 +20,9 @@ module Ogg::Codecs
       tag_size.times do |i|
         size = pio.read(4).unpack("V")[0]
         comment = pio.read(size)
+        unless RUBY_VERSION[0..2] == "1.8"
+          comment.force_encoding("UTF-8")
+        end
         key, val = comment.split(/=/, 2)
         tag[key.downcase] = val
       end
@@ -39,12 +42,20 @@ module Ogg::Codecs
       packet_data << [tag.size].pack("V")
       tag.each do |k,v|
         tag_data = "#{ k }=#{ v }"
-        packet_data << [ tag_data.length ].pack("V")
+        packet_data << [ binary_size(tag_data) ].pack("V")
         packet_data << tag_data
       end
       
       packet_data << "\001"
       packet_data
+    end
+
+    def binary_size(s)
+      if RUBY_VERSION[0..2] == "1.8"
+        s.size
+      else
+        s.bytes.to_a.size
+      end
     end
   end
 end

@@ -145,6 +145,12 @@ class OggInfoTest < Test::Unit::TestCase
     end
   end
 
+  def test_good_writing_of_utf8_strings
+    tag = { "title" => "this is a éé utf8 string",
+            "artist" => "and è another one à"}
+    tag_test("tag_writing", tag)
+  end
+
   def test_tag_writing
     data = "a"*256
     tag_test("tag_writing", "title" => data, "artist" => data )
