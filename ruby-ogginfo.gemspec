@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{ruby-ogginfo}
-  s.version = "0.6.7"
+  s.version = "0.6.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Guillaume Pierronnet", "Grant Gardner"]
-  s.date = %q{2012-02-27}
+  s.date = %q{2012-02-28}
   s.description = %q{ruby-ogginfo gives you access to low level information on ogg files
 (bitrate, length, samplerate, encoder, etc... ), as well as tag.
 It is written in pure ruby.}
