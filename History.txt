@@ -1,3 +1,8 @@
+=== 0.6.8 / 2012-02-28
+
+* removed :encoding parameter on OggInfo#new
+* utf8 strings are correctly written now in ruby > 1.9
+
 === 0.6.7 / 2012-02-27
 
 * fixes for ruby 1.9 (again)
