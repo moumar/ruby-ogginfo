@@ -87,40 +87,6 @@ class SpxInfoTest < Test::Unit::TestCase
     end
   end
 
-
-  def test_charset
-    generate_spx
-    FileUtils.cp("test.spx",GEN_FILE)
-    if RUBY_VERSION[0..2] == '1.8'
-      OggInfo.open(GEN_FILE, "utf-8") do |spx|
-    	assert_equal "hello\303\251",spx.tag["test"] 
-      end
-
-      OggInfo.open(GEN_FILE, "iso-8859-1") do |spx|
-        assert_equal "hello\xe9", spx.tag["test"] 
-      end
-
-    else
-      # In Ruby >= 1.9, all strings are UTF-8, and are made up by
-      # characters (and not anymore bytes). So, we hand-craft it in a
-      # dumb-enough encoding.
-      OggInfo.open(GEN_FILE, "utf-8") do |spx|
-        string = ''
-        string.force_encoding 'ascii-8bit'
-        [104, 101, 108, 108, 111, 195, 169].each {|chr| string << chr}
-        assert_equal string, spx.tag["test"]
-      end
-
-      OggInfo.open(GEN_FILE, "iso-8859-1") do |spx|
-        string = ''
-        string.force_encoding 'iso-8859-1'
-        [104, 101, 108, 108, 111, 233].each {|chr| string << chr}
-        assert_equal string, spx.tag["test"]
-      end
-
-    end
-  end
-  
   def test_tag_writing
     generate_spx
     FileUtils.cp("test.spx",GEN_FILE)

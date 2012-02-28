@@ -1,4 +1,5 @@
 #!/usr/bin/ruby -w
+# encoding: utf-8
 
 $:.unshift("lib/")
 
@@ -130,6 +131,20 @@ class OggInfoTest < Test::Unit::TestCase
     end
   end
 
+  def test_writing_to_spedial_filenames
+    tf = generate_ogg
+    filename = "fichier éé.ogg"
+    FileUtils.cp(tf.path, filename)
+    begin
+      OggInfo.open(tf.path) do |ogg|
+        ogg.tag.title = "a"*200
+      end
+      #system("ls", "-l", filename)
+    ensure
+      FileUtils.rm_f(filename) 
+    end
+  end
+
   def test_tag_writing
     data = "a"*256
     tag_test("tag_writing", "title" => data, "artist" => data )
@@ -138,24 +153,6 @@ class OggInfoTest < Test::Unit::TestCase
   def test_big_tags
     data = "a"*60000
     tag_test("big_tags", "title" => data, "artist" => data )
-  end
-
-  def test_charset
-    tf = generate_ogg
-    OggInfo.open(tf.path, "utf-8") do |ogg|
-      ogg.tag["title"] = "hello\303\251"
-    end
-
-    OggInfo.open(tf.path, "iso-8859-1") do |ogg|
-      if RUBY_VERSION[0..2] == '1.8'
-        assert_equal "hello\xe9", ogg.tag["title"] 
-      else
-        string = ''
-        string.force_encoding 'iso-8859-1'
-        [104, 101, 108, 108, 111, 233].each {|chr| string << chr}
-        assert_equal string, ogg.tag["title"] 
-      end
-    end
   end
 
   def test_should_not_fail_when_input_is_truncated

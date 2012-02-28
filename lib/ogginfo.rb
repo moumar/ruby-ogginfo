@@ -4,9 +4,8 @@
 # 
 # License: ruby
 
-require "iconv"
 require 'forwardable'
-require "tempfile"
+require "tmpdir"
 require File.join(File.dirname(__FILE__), 'ogg.rb')
 
 class Hash 
@@ -35,10 +34,13 @@ class OggInfo
   # +tag+ is a hash containing the vorbis tag like "Artist", "Title", and the like
   attr_reader :tag
   		
-  # create new instance of OggInfo, using +charset+ to convert tags
-  def initialize(filename, charset = "utf-8")
+  # create new instance of OggInfo
+  # use of charset is deprecated! please use utf-8 encoded strings and leave +charset+ to nil")
+  def initialize(filename, charset = nil)
+    if charset
+      warn("use of charset is deprecated! please use utf-8 encoded tags")
+    end
     @filename = filename
-    @charset = charset
     @length = nil
     @bitrate = nil
     filesize = File.size(@filename)
@@ -57,7 +59,6 @@ class OggInfo
       end
     end
 
-    convert_tag_charset("utf-8", @charset)
     @original_tag = @tag.dup
   end
 
@@ -98,18 +99,14 @@ class OggInfo
   # commits any tags to file
   def close
     if tag != @original_tag
-      convert_tag_charset(@charset, "utf-8")
-      
-      tempfile = File.new("ruby-ogginfo", "wb")
-      begin
-        File.open(@filename, "rb") do | input |
-          replace_tags(input, tempfile, tag)
-        end
-        tempfile.flush
-        FileUtils.mv(tempfile.path, @filename)
-      ensure
-        tempfile.close
+      path = File.join(Dir.tmpdir, "ruby-ogginfo_#{$$}.ogg") 
+      tempfile = File.new(path, "wb")
+
+      File.open(@filename, "rb") do | input |
+        replace_tags(input, tempfile, tag)
       end
+      tempfile.close
+      FileUtils.mv(path, @filename)
     end
   end
 
@@ -170,15 +167,6 @@ private
       end
     else
       FileUtils.copy_stream(reader.input, writer.output)
-    end
-  end
-
-  def convert_tag_charset(from_charset, to_charset)
-    return if from_charset == to_charset
-    Iconv.open(to_charset, from_charset) do |ic|
-      tag.each do |k, v|
-        tag[k] = ic.iconv(v)
-      end
     end
   end
 end
