@@ -11,8 +11,7 @@ It is written in pure ruby.
 
 == FEATURES/PROBLEMS
 
-* writing tags is not pure ruby yet, need to have "vorbiscomment"
-  command
+* writing tags is now pure ruby 
 
 == SYNOPSIS:
 
