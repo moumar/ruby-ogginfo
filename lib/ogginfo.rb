@@ -44,7 +44,7 @@ class OggInfo
     @length = nil
     @bitrate = nil
     filesize = File.size(@filename)
-    File.open(@filename) do |file|
+    File.open(@filename, 'rb') do |file|
       begin
      	info = read_headers(file)
         @samplerate = info[:samplerate]
