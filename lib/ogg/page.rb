@@ -27,24 +27,25 @@ module Ogg
       page = Page.new(bitstream_serial_no, granule_pos)
       page.header = header
       page.sequence_no = sequence_no
-      raise(StreamError, "got EOF when reading page") if io.eof?
       
-      segment_sizes = io.read(segments).unpack("C*")
-      if options[:skip_body]
-        body_size = segment_sizes.inject(0) { |sum, i| sum + i }
-        io.seek(body_size, IO::SEEK_CUR)
-      else
-        segment_sizes.each do |size| 
-          break if io.eof?
-          page.segments << io.read(size)
-        end
-        if options[:checksum] 
-          if @checksum != Ogg.compute_checksum(page.pack)
-            raise(StreamError, "bad checksum: expected #{ @checksum }, got #{ page.checksum }")
+      unless io.eof?
+        segment_sizes = io.read(segments).unpack("C*")
+        if options[:skip_body]
+          body_size = segment_sizes.inject(0) { |sum, i| sum + i }
+          io.seek(body_size, IO::SEEK_CUR)
+        else
+          segment_sizes.each do |size| 
+            break if io.eof?
+            page.segments << io.read(size)
+          end
+          if options[:checksum] 
+            if @checksum != Ogg.compute_checksum(page.pack)
+              raise(StreamError, "bad checksum: expected #{ @checksum }, got #{ page.checksum }")
+            end
           end
         end
       end
-      
+        
       page
     end
     
