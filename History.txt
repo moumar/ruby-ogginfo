@@ -1,3 +1,7 @@
+=== 0.6.10 / 2012-05-18
+
+* doesn't show binary dump in raise messages anymore
+
 === 0.6.9 / 2012-05-18
 
 * more robust Ogg pages parsing. (doesn't fail on truncated Ogg files)
