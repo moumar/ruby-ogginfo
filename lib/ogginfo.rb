@@ -25,7 +25,7 @@ end
 class OggInfoError < StandardError ; end
 
 class OggInfo
-  VERSION = "0.6.8"
+  VERSION = "0.6.9"
   extend Forwardable
   include Ogg
   
