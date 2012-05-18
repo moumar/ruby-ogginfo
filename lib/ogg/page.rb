@@ -21,7 +21,7 @@ module Ogg
       segments = chunk.unpack("a4CCQVVVC") #a4CCQNNNC
       
       if capture_pattern != "OggS"
-        raise(StreamError, "bad magic number '#{ capture_pattern }'")
+        raise(StreamError, "bad magic number")
       end
       
       page = Page.new(bitstream_serial_no, granule_pos)
