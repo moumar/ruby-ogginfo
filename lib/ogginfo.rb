@@ -25,7 +25,7 @@ end
 class OggInfoError < StandardError ; end
 
 class OggInfo
-  VERSION = "0.6.10"
+  VERSION = "0.6.11"
   extend Forwardable
   include Ogg
   
@@ -132,8 +132,21 @@ private
   def compute_length(input)
     reader = Reader.new(input)
     last_page = nil
-    reader.each_pages({ :skip_body => true, :skip_checksum => true }) { |page| last_page = page }
-    return last_page.granule_pos.to_f / @samplerate
+
+    begin
+      reader.each_pages(:skip_body => true, :skip_checksum => true) do |page| 
+        if page.granule_pos
+          last_page = page
+        end
+      end
+    rescue Ogg::StreamError
+    end
+
+    if last_page
+      return last_page.granule_pos.to_f / @samplerate
+    else
+      return 0
+    end
   end
   
 
