@@ -15,22 +15,22 @@ module Ogg::Codecs
       end
       
       def replace_tags(reader, writer, new_tags, vendor)
-        tag_packet = reader.read_packets(1)
+        _ = reader.read_packets(1) # tag_packet
         writer.write_packets(0, pack_comments(new_tags, vendor))
       end
       
       def extract_info(info_packet)
-        speex_string,
-        speex_version,
-        speex_version_id,
-        header_size,
+        _, #speex_string,
+        _, #speex_version,
+        _, #speex_version_id,
+        _, #header_size,
         samplerate,
-        mode,
-        mode_bitstream_version,
+        _, #mode,
+        _, #mode_bitstream_version,
         channels,
         nominal_bitrate,
-        framesize,
-        vbr = info_packet.unpack("A8A20VVVVVVVVV")
+        #framesize, vbr
+        _, _ = info_packet.unpack("A8A20VVVVVVVVV")
         #not sure how to make sense of the bitrate info,picard doesn't show it either...
         
         return { :channels => channels, :samplerate => samplerate, :nominal_bitrate => nominal_bitrate }

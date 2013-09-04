@@ -12,7 +12,7 @@ module Ogg
       chunk = io.read(27)
       
       capture_pattern,
-      version,
+      _,        # version
       header,
       granule_pos,
       bitstream_serial_no,

@@ -123,7 +123,6 @@ if __FILE__ == $0
     info = Ogg.read_headers(input)
     pp info
     vendor = info[:tag_vendor]
-    tag = info[:tag]
   end
   
   File.open(infile,"r") do | input |
