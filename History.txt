@@ -1,3 +1,8 @@
+=== 0.6.12 / 2013-09-05
+
+* avoid potential race condition on temp file creation
+* remove warnings on unused variables
+
 === 0.6.11 / 2012-07-16
 
 * more robust compute_length() method (works on broken OGGs)
