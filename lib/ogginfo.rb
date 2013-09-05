@@ -5,7 +5,7 @@
 # License: ruby
 
 require 'forwardable'
-require "tmpdir"
+require "tempfile"
 require File.join(File.dirname(__FILE__), 'ogg.rb')
 
 class Hash 
@@ -98,14 +98,15 @@ class OggInfo
   # commits any tags to file
   def close
     if tag != @original_tag
-      path = File.join(Dir.tmpdir, "ruby-ogginfo_#{$$}.ogg") 
-      tempfile = File.new(path, "wb")
-
-      File.open(@filename, "rb") do | input |
-        replace_tags(input, tempfile, tag)
+      Tempfile.open(["ruby-ogginfo", ".ogg"]) do |tempfile|
+        tempfile.close
+        tempfile = File.new(tempfile.path, "wb")
+        File.open(@filename, "rb") do | input |
+          replace_tags(input, tempfile, tag)
+        end
+        tempfile.close
+        FileUtils.cp(tempfile.path, @filename)
       end
-      tempfile.close
-      FileUtils.mv(path, @filename)
     end
   end
 
