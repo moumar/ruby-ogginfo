@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
-# stub: ruby-ogginfo 0.6.12.20131025183045 ruby lib
+# stub: ruby-ogginfo 0.6.13.20131025191638 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "ruby-ogginfo"
-  s.version = "0.6.12.20131025183045"
+  s.version = "0.6.13"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Guillaume Pierronnet", "Grant Gardner"]
