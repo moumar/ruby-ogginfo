@@ -25,7 +25,7 @@ end
 class OggInfoError < StandardError ; end
 
 class OggInfo
-  VERSION = "0.6.12"
+  VERSION = "0.6.13"
   extend Forwardable
   include Ogg
   
@@ -77,6 +77,31 @@ class OggInfo
   # since we depend on the length
   def bitrate
     @bitrate ||= (@filesize * 8).to_f / length()
+  end
+
+  # Add a picture (.jpg or .png) to the ogg file
+  def picture=(filepath)
+    ext = File.extname(filepath)
+    mime_type = {
+      ".jpg" => "image/jpeg",
+      ".png" => "image/png"
+    }[ext]
+    description = "folder#{ext}"
+    raw_string = 
+      [3,               # picture type
+       mime_type.size,
+       mime_type,
+       description.size,
+       description,
+       0,               # width
+       0,               # height
+       0,               # color depth
+       0,               # number of colors used
+       File.size(filepath),
+       File.binread(filepath)
+      ].pack("NNa*Na*NNNNNa*")
+       
+    @tag["METADATA_BLOCK_PICTURE"] = [raw_string].pack("m*").strip
   end
   
   # "block version" of ::new()
