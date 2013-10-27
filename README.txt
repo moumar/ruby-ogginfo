@@ -7,6 +7,7 @@ https://github.com/moumar/ruby-ogginfo
 
 ruby-ogginfo gives you access to low level information on ogg files
 (bitrate, length, samplerate, encoder, etc... ), as well as tag.
+Supported codecs are: vorbis, speex and opus.
 It is written in pure ruby.
 
 == FEATURES/PROBLEMS
