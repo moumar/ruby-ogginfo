@@ -4,7 +4,7 @@ module Ogg::Codecs
       include VorbisComments
       # return true/false based on whether the header packet belongs to us
       def match?(header_packet)
-        /^\001vorbis.*/ =~ header_packet
+        header_packet.start_with?("\001vorbis")
       end
       
       #consume header and tag pages, return array of two hashes, info and tags 

@@ -3,8 +3,8 @@ module Ogg::Codecs
     class << self
       include VorbisComments
 
-      def match?(packet)
-        /^Speex/ =~ packet
+      def match?(header_packet)
+        header_packet.start_with?("Speex")
       end
       
       def decode_headers(reader)

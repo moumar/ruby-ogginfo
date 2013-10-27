@@ -2,7 +2,7 @@
 # see http://www.xiph.org/ogg/vorbis/docs.html for documentation on vorbis format
 # http://www.xiph.org/vorbis/doc/framing.html
 
-%w{page reader writer codecs/comments codecs/vorbis codecs/speex}.each do |file|
+%w{page reader writer codecs/comments codecs/vorbis codecs/speex codecs/opus}.each do |file|
   require File.join(File.dirname(__FILE__), "ogg", file)
 end
 

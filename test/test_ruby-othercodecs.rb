@@ -20,11 +20,11 @@ class OtherCodecsInfoTest < Test::Unit::TestCase
       OggInfo.open(@fixtures[codec]) do |ogg|
         assert_equal 2, ogg.channels
         assert_equal 48000, ogg.samplerate
-        assert_in_delta(3, ogg.length, 0.2, "length has not been correctly guessed for codec \"#{codec}\"")
         case codec 
         when :speex
           assert_equal "spxinfotest", ogg.tag.author
         when :opus
+          assert_in_delta(3, ogg.length, 0.2, "length has not been correctly guessed for codec \"#{codec}\"")
           assert_in_delta 64000, ogg.bitrate, 2000
           assert_equal "artist", ogg.tag.artist
         end
