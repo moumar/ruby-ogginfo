@@ -1,3 +1,4 @@
+\.swp$
 syntax:glob
 pkg
 doc

@@ -34,35 +34,6 @@ class OggInfoTest < Test::Unit::TestCase
     end
   end
 
-  def test_writing_to_spedial_filenames
-    filename = "fichier éé.ogg"
-    FileUtils.cp(@tempfile, filename)
-    begin
-      OggInfo.open(@tempfile) do |ogg|
-        ogg.tag.title = "a"*200
-      end
-      #system("ls", "-l", filename)
-    ensure
-      FileUtils.rm_f(filename) 
-    end
-  end
-
-  def test_good_writing_of_utf8_strings
-    tag = { "title" => "this is a éé utf8 string",
-            "artist" => "and è another one à"}
-    tag_test("tag_writing", tag)
-  end
-
-  def test_tag_writing
-    data = "a"*256
-    tag_test("tag_writing", "title" => data, "artist" => data )
-  end
-
-  def test_big_tags
-    data = "a"*60000
-    tag_test("big_tags", "title" => data, "artist" => data )
-  end
-
   def test_should_not_fail_when_input_is_truncated
     ogg_length = nil
     OggInfo.open(@tempfile) do |ogg|
@@ -133,24 +104,5 @@ class OggInfoTest < Test::Unit::TestCase
     tf.write(data)
     tf.close
     tf
-  end
-
-  def tag_test(test_name, tag) 
-    OggInfo.open(@tempfile) do |ogg|
-      tag.each { |k,v| ogg.tag[k] = v }
-    end
-
-    OggInfo.open(@tempfile) do |ogg|
-      assert_equal tag, ogg.tag
-    end
-    system("cp #{@tempfile} /tmp/test_#{RUBY_VERSION}_#{test_name}.ogg")
-    test_length
-    assert_nothing_raised do
-      io = open(@tempfile)
-      reader = Ogg::Reader.new(io)
-      reader.each_pages do |page|
-        page
-      end
-    end
   end
 end

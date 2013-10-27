@@ -33,7 +33,7 @@ module Ogg::Codecs
     
     # Pack tag Hash and vendor string into an ogg packet.
     def pack_comments(tag, vendor, preamble="")
-      packet_data = ""
+      packet_data = "".force_encoding("binary")
       packet_data << preamble
       
       packet_data << [ vendor.length ].pack("V")
@@ -42,6 +42,9 @@ module Ogg::Codecs
       packet_data << [tag.size].pack("V")
       tag.each do |k,v|
         tag_data = "#{ k }=#{ v }"
+        unless RUBY_VERSION[0..2] == "1.8"
+          tag_data.force_encoding("binary")
+        end
         packet_data << [ binary_size(tag_data) ].pack("V")
         packet_data << tag_data
       end
@@ -54,7 +57,7 @@ module Ogg::Codecs
       if RUBY_VERSION[0..2] == "1.8"
         s.size
       else
-        s.bytes.to_a.size
+        s.dup.force_encoding("BINARY").size
       end
     end
   end
