@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "ruby-ogginfo"
   s.rubygems_version = "2.1.5"
   s.summary = "ruby-ogginfo gives you access to low level information on ogg files (bitrate, length, samplerate, encoder, etc.."
-  s.test_files = ["test/test_ruby-othercodecs.rb", "test/test_ruby-ogginfo.rb"]
+  s.test_files = ["test/test_ruby-othercodecs.rb", "test/test_ruby-ogginfo.rb", "test/test_helper.rb"]
 
   if s.respond_to? :specification_version then
     s.specification_version = 4
