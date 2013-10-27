@@ -92,6 +92,38 @@ class OggInfoTest < Test::Unit::TestCase
     end
   end
 
+  def test_picture
+    tf = Tempfile.new(["ruby-ogginfo", ".jpg"])
+    jpg_content = (0...1000).collect { rand(256).chr }.join("")
+    tf.write(jpg_content)
+    tf.close
+    OggInfo.open(@tempfile) do |ogg|
+      ogg.picture = tf.path
+    end
+    OggInfo.open(@tempfile) do |ogg|
+      assert ogg.tag.has_key?("metadata_block_picture")
+
+      type, # picture type
+      _, # mime_type size
+      mime_type, 
+      _, # description size
+      description, 
+      _, # width
+      _, # height
+      _, # color depth
+      _, # number of color used
+      file_content_size, 
+      file_content = ogg.tag["metadata_block_picture"].unpack("m*").first.unpack("NNa10Na10NNNNNa*")
+      assert_equal 3, type
+      assert_equal "image/jpeg", mime_type
+      assert_equal "folder.jpg", description
+      assert_equal jpg_content.size, file_content_size
+      assert_equal jpg_content, file_content
+
+      assert_equal [".jpg", jpg_content], ogg.picture
+    end
+  end
+
   protected
 
   def generate_truncated_ogg
