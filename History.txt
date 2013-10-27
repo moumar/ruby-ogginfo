@@ -1,3 +1,7 @@
+=== 0.7 / 2013-10-27
+
+* opus codec added
+
 === 0.6.13 / 2013-10-25
 
 * added OggInfo#picture=(filepath) method to add picture to OggFile with METADATA_BLOCK_PICTURE tag

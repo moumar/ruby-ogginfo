@@ -5,11 +5,14 @@ Rakefile
 lib/ogg/codecs/comments.rb
 lib/ogg/codecs/speex.rb
 lib/ogg/codecs/vorbis.rb
+lib/ogg/codecs/opus.rb
 lib/ogg/page.rb
 lib/ogg/reader.rb
 lib/ogg/writer.rb
 lib/ogg.rb
 lib/ogginfo.rb
 setup.rb
+test/fixtures.yml
+test/test_helper.rb
 test/test_ruby-ogginfo.rb
-test/test_ruby-spxinfo.rb
+test/test_ruby-othercodecs.rb
