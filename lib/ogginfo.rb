@@ -79,7 +79,7 @@ class OggInfo
     @bitrate ||= (@filesize * 8).to_f / length()
   end
 
-  # Add a picture (.jpg or .png) to the ogg file
+  # set a picture (.jpg or .png) on the ogg file
   def picture=(filepath)
     ext = File.extname(filepath)
     mime_type = {
@@ -102,6 +102,31 @@ class OggInfo
       ].pack("NNa*Na*NNNNNa*")
        
     @tag["METADATA_BLOCK_PICTURE"] = [raw_string].pack("m*").strip
+  end
+  
+  # get the picture as an array of [extension, file_content]
+  # or nil if not existent
+  def picture
+    extensions = {
+      "image/jpeg" => ".jpg",
+      "image/png" => ".png" 
+    }
+
+    if content = tag["metadata_block_picture"]
+      _, #type, # picture type
+      _, # mime_type size
+      mime_type, 
+      _, # description size
+      _, # description, 
+      _, # width
+      _, # height
+      _, # color depth
+      _, # number of color used
+      _, #file_content_size, 
+      file_content = content.unpack("m*").first.unpack("NNa10Na10NNNNNa*")
+      return [extensions[mime_type], file_content]
+    end
+    nil
   end
   
   # "block version" of ::new()
