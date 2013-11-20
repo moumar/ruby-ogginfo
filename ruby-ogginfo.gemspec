@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "ruby-ogginfo"
-  s.version = "0.7.1"
+  s.version = "0.7.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Guillaume Pierronnet", "Grant Gardner"]
@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.rubygems_version = "2.1.5"
   s.summary = "ruby-ogginfo gives you access to low level information on ogg files (bitrate, length, samplerate, encoder, etc.."
   s.test_files = ["test/test_ruby-othercodecs.rb", "test/test_ruby-ogginfo.rb", "test/test_helper.rb"]
+  s.license = 'GPL-3'
 
   if s.respond_to? :specification_version then
     s.specification_version = 4

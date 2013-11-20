@@ -33,4 +33,4 @@ sudo gem install ruby-ogginfo
 
 == LICENSE:
 
-Ruby
+GPL v3
