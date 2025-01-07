@@ -1,5 +1,9 @@
 = ruby-ogginfo
 
+== Status: unmaintained
+
+🚨 This project is no longer actively maintained.
+
 http://ruby-ogginfo.rubyforge.org/
 https://github.com/moumar/ruby-ogginfo
 
